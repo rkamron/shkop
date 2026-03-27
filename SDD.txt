@@ -1,0 +1,137 @@
+SOFTWARE DESIGN DOCUMENT (SDD)
+AI Wardrobe Stylist Mobile App (v1)
+
+1. System Architecture
+- Frontend: React Native (Expo)
+- Backend: FastAPI / Node.js
+- Database: Supabase (PostgreSQL)
+- Storage: Supabase Storage
+- Auth: Supabase Auth
+
+2. High-Level Architecture
+Mobile App -> API Server -> Supabase Database/Storage
+
+3. Database Schema
+
+Profiles
+- id (uuid, pk, references auth.users)
+- email
+- username
+- created_at
+- updated_at
+
+Preferences
+- id (uuid, pk)
+- user_id (uuid, unique, references auth.users)
+- favorite_colors (text[])
+- disliked_colors (text[])
+- preferred_styles (text[])
+- sizes (jsonb)
+- created_at
+- updated_at
+
+ClothingItems
+- id (uuid, pk)
+- user_id (uuid, references auth.users)
+- image_path
+- category
+- color
+- style
+- ai_tags (jsonb)
+- created_at
+- updated_at
+- last_worn
+- is_favorite
+
+Outfits
+- id (uuid, pk)
+- user_id (uuid, references auth.users)
+- name
+- occasion
+- notes
+- created_at
+- updated_at
+- is_favorite
+
+OutfitItems
+- id (uuid, pk)
+- outfit_id (uuid, references outfits)
+- clothing_item_id (uuid, references clothing_items)
+- unique(outfit_id, clothing_item_id)
+
+WearHistory
+- id (uuid, pk)
+- user_id (uuid, references auth.users)
+- outfit_id (uuid, nullable)
+- worn_date
+- notes
+- created_at
+
+Feedback
+- id (uuid, pk)
+- user_id (uuid, references auth.users)
+- outfit_id (uuid, references outfits)
+- feedback_type
+- feedback_note
+- created_at
+
+4. API Endpoints
+
+Auth
+- POST /signup
+- POST /login
+
+Clothing
+- POST /clothing/upload
+- GET /clothing
+- GET /clothing/{id}
+- PUT /clothing/{id}
+- DELETE /clothing/{id}
+
+Outfits
+- POST /outfits/generate
+- POST /outfits/save
+- GET /outfits
+
+Chat
+- POST /chat (returns "hello")
+
+Preferences
+- POST /preferences
+- GET /preferences
+
+Wear History
+- POST /wear
+- GET /wear
+
+5. Frontend Screens
+
+- Splash Screen
+- Onboarding
+- Login/Signup
+- Home Dashboard
+- Add Clothing Item
+- Item Review/Edit
+- Closet Grid
+- Item Detail
+- Recommendations Screen
+- Saved Outfits
+- Chat Screen
+- Profile/Settings
+
+6. Data Flow
+
+Upload Flow:
+User -> Upload Image -> API -> Storage -> Save Metadata -> Confirm Tags -> Save Item
+
+Recommendation Flow:
+User Request -> API -> (stub logic) -> Return outfit list
+
+Chat Flow:
+User Message -> API -> Return "hello"
+
+7. Future Extensions
+- AI tagging model
+- Recommendation engine
+- Advanced chat stylist
+- Social features
