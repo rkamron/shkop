@@ -1,41 +1,25 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
-import { Stack } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
-import 'react-native-reanimated'
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import "react-native-reanimated";
 
-import { SplashScreenController } from '@/components/splash-screen-controller'
-
-import { useAuthContext } from '@/hooks/use-auth-context'
-import { useColorScheme } from '@/hooks/use-color-scheme'
-import AuthProvider from '@/providers/auth-provider'
-
-// Separate RootNavigator so we can access the AuthContext
-function RootNavigator() {
-  const { isLoggedIn } = useAuthContext()
-
-  return (
-    <Stack>
-      <Stack.Protected guard={isLoggedIn}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack.Protected>
-      <Stack.Protected guard={!isLoggedIn}>
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-      </Stack.Protected>
-      <Stack.Screen name="+not-found" />
-    </Stack>
-  )
-}
+import { SplashScreenController } from "@/components/splash-screen-controller";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import AuthProvider from "@/providers/auth-provider";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme()
+  const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <AuthProvider>
         <SplashScreenController />
-        <RootNavigator />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(public)" />
+          <Stack.Screen name="(protected)" />
+        </Stack>
         <StatusBar style="auto" />
       </AuthProvider>
     </ThemeProvider>
-  )
+  );
 }

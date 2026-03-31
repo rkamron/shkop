@@ -1,61 +1,109 @@
-import { AuthContext } from '@/hooks/use-auth-context'
-import { supabase } from '@/lib/supabase'
-import { PropsWithChildren, useEffect, useState } from 'react'
+import { AuthContext } from "@/hooks/use-auth-context";
+import { supabase } from "@/lib/supabase";
+import { PropsWithChildren, useEffect, useState } from "react";
 
 export default function AuthProvider({ children }: PropsWithChildren) {
-  const [claims, setClaims] = useState<Record<string, any> | undefined | null>()
-  const [profile, setProfile] = useState<any>()
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [claims, setClaims] = useState<Record<string, any> | undefined | null>();
+  const [profile, setProfile] = useState<any>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isAuthActionLoading, setIsAuthActionLoading] = useState(false);
 
-  // Fetch the claims once, and subscribe to auth state changes
   useEffect(() => {
-    const fetchClaims = async () => {
-      setIsLoading(true)
+    const syncAuthState = async () => {
+      setIsLoading(true);
 
-      const { data, error } = await supabase.auth.getClaims()
+      const { data: claimsData, error: claimsError } =
+        await supabase.auth.getClaims();
 
-      if (error) {
-        console.error('Error fetching claims:', error)
+      if (claimsError) {
+        console.error("Error fetching claims:", claimsError);
       }
 
-      setClaims(data?.claims ?? null)
-      setIsLoading(false)
-    }
+      const nextClaims = claimsData?.claims ?? null;
+      setClaims(nextClaims);
 
-    fetchClaims()
+      if (!nextClaims?.sub) {
+        setProfile(null);
+        setIsLoading(false);
+        return;
+      }
+
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", nextClaims.sub)
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching profile:", profileError);
+      }
+
+      setProfile(profileData ?? null);
+      setIsLoading(false);
+    };
+
+    void syncAuthState();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, _session) => {
-      console.log('Auth state changed:', { event: _event })
-      const { data } = await supabase.auth.getClaims()
-      setClaims(data?.claims ?? null)
-    })
+    } = supabase.auth.onAuthStateChange(() => {
+      void syncAuthState();
+    });
 
-    // Cleanup subscription on unmount
     return () => {
-      subscription.unsubscribe()
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const signInWithPassword = async (email: string, password: string) => {
+    setIsAuthActionLoading(true);
+    setAuthError(null);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setAuthError(error.message);
+      setIsAuthActionLoading(false);
+      return;
     }
-  }, [])
 
-  // Fetch the profile when the claims change
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setIsLoading(true)
+    setIsAuthActionLoading(false);
+  };
 
-      if (claims) {
-        const { data } = await supabase.from('profiles').select('*').eq('id', claims.sub).single()
+  const signUpWithPassword = async (email: string, password: string) => {
+    setIsAuthActionLoading(true);
+    setAuthError(null);
 
-        setProfile(data)
-      } else {
-        setProfile(null)
-      }
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-      setIsLoading(false)
+    if (error) {
+      setAuthError(error.message);
+      setIsAuthActionLoading(false);
+      return;
     }
 
-    fetchProfile()
-  }, [claims])
+    setIsAuthActionLoading(false);
+  };
+
+  const signOut = async () => {
+    setIsAuthActionLoading(true);
+    setAuthError(null);
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      setAuthError(error.message);
+    }
+
+    setIsAuthActionLoading(false);
+  };
 
   return (
     <AuthContext.Provider
@@ -63,10 +111,15 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         claims,
         isLoading,
         profile,
-        isLoggedIn: claims != undefined,
+        authError,
+        isAuthActionLoading,
+        isLoggedIn: claims !== null && claims !== undefined,
+        signInWithPassword,
+        signUpWithPassword,
+        signOut,
       }}
     >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
