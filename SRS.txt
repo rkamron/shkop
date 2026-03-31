@@ -85,7 +85,128 @@ General consumers with no technical expertise required.
 - Scalability: Supabase backend
 - Usability: Simple mobile UI
 
+
 5. Assumptions
 - AI tagging not implemented
 - Recommendation engine not implemented
 - Chat is stubbed
+
+6. Application Structure and Screens
+
+6.1 Navigation Structure
+The application will use a bottom tab navigation system with the following primary sections:
+- Home
+- Closet
+- Add
+- Outfits
+- Profile
+
+Each tab contains its own stack-based navigation for related screens.
+
+6.2 Home Section
+Purpose: Provide daily value and quick access to recommendations and actions.
+
+Screens:
+- Home Dashboard
+  - Displays greeting
+  - Displays weather-based prompt
+  - Shows recommended outfits
+  - Provides quick actions:
+    - Add clothing item
+    - Open stylist chat
+    - View saved outfits
+    - Log worn outfit
+
+- Recommendation Results
+  - Displays generated outfit suggestions
+  - Allows saving outfits
+
+- Stylist Chat
+  - Chat interface for styling requests
+  - Stub response system returning "hello"
+
+6.3 Closet Section
+Purpose: Manage and browse all clothing items.
+
+Screens:
+- Closet Grid
+  - Displays all clothing items in a grid layout
+  - Supports filtering by category, color, and style
+
+- Clothing Item Detail
+  - Displays full image and metadata
+  - Shows last worn date
+  - Allows marking as favorite
+  - Allows editing and deleting item
+
+- Edit Clothing Item
+  - Allows user to update clothing metadata
+
+6.4 Add Section
+Purpose: Capture and add new clothing items to the closet.
+
+Screens:
+- Add Entry
+  - Options to take photo or upload from gallery
+
+- Camera Screen
+  - Allows user to capture a clothing item image
+
+- Photo Preview
+  - Displays captured image
+  - Allows retake or proceed
+
+- AI Review Screen
+  - Displays detected clothing attributes (mocked)
+  - Allows user to review before saving
+
+- Edit Clothing Info
+  - Allows user to modify clothing attributes before saving
+
+6.5 Outfits Section
+Purpose: Manage and view saved outfits and generated recommendations.
+
+Screens:
+- Saved Outfits Feed
+  - Displays all saved outfits in a scrollable list
+
+- Outfit Detail
+  - Displays outfit composition
+  - Allows marking as favorite
+  - Allows marking as worn
+  - Allows providing feedback
+
+- Recommendation Results
+  - Displays generated outfit suggestions
+  - Allows saving selected outfits
+
+6.6 Profile Section
+Purpose: Manage user account and preferences.
+
+Screens:
+- Profile / Settings
+  - Displays user account information
+  - Allows logout
+
+- Preferences
+  - Allows editing:
+    - favorite colors
+    - disliked colors
+    - preferred styles
+    - sizes
+
+- Settings
+  - Notification preferences
+  - Daily outfit prompt toggle
+
+6.7 Onboarding Flow
+- Collects user preferences:
+  - favorite colors
+  - disliked colors
+  - preferred styles
+  - sizes
+- Occurs after initial signup or first login if preferences are missing
+
+6.8 Additional Considerations
+- Wear history may be surfaced in future screens or integrated into Home or Profile
+- Chat functionality is included in UI but uses stubbed backend responses in v1
