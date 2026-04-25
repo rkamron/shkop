@@ -48,13 +48,13 @@ export default function ProtectedTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="closet"
+        name="wardrobe"
         options={{
-          title: "Closet",
-          href: "./closet",
+          title: "Wardrobe",
+          href: "./wardrobe",
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
-              name={focused ? "shirt" : "shirt-outline"}
+              name={focused ? "albums" : "albums-outline"}
               color={color}
               focused={focused}
             />
@@ -81,13 +81,13 @@ export default function ProtectedTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="outfits"
+        name="stylist"
         options={{
-          title: "Outfits",
-          href: "./outfits",
+          title: "Stylist",
+          href: "./stylist",
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
-              name={focused ? "sparkles" : "sparkles-outline"}
+              name={focused ? "color-wand" : "color-wand-outline"}
               color={color}
               focused={focused}
             />
@@ -95,10 +95,10 @@ export default function ProtectedTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="me"
         options={{
-          title: "Profile",
-          href: "./profile",
+          title: "Me",
+          href: "./me",
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
               name={focused ? "person-circle" : "person-circle-outline"}
@@ -108,6 +108,10 @@ export default function ProtectedTabsLayout() {
           ),
         }}
       />
+      {/* Hidden legacy tabs — kept for their stack screens, not shown in tab bar */}
+      <Tabs.Screen name="closet" options={{ href: null }} />
+      <Tabs.Screen name="outfits" options={{ href: null }} />
+      <Tabs.Screen name="profile" options={{ href: null }} />
     </Tabs>
   );
 }

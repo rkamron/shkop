@@ -9,7 +9,7 @@ This document defines the requirements for a mobile application that acts as a p
 The application is a mobile-only product built using React Native and Expo. It provides wardrobe storage, outfit recommendations based on owned clothes, and a basic chat interface.
 
 1.3 Definitions
-- Closet: Collection of user clothing items
+- Wardrobe: The user's full collection, encompassing both clothing items and outfits
 - Outfit: Combination of clothing items
 - Item: Single clothing piece uploaded by user
 
@@ -42,13 +42,14 @@ General consumers with no technical expertise required.
 3.3 Clothing Item Management
 - Users can take photos
 - Users can upload images
-- System shows detected tags (mocked)
+- System shows detected tags
 - Users can edit tags
 - Users can save items to closet
 
-3.4 Closet Management
-- Users can view closet in grid
-- Users can filter items by:
+3.4 Wardrobe Management
+- Users can view clothing items in a grid under the Wardrobe tab
+- Users can view outfits in a list under the Wardrobe tab
+- Users can filter clothing items by:
   - category
   - color
   - style
@@ -63,9 +64,8 @@ General consumers with no technical expertise required.
 - Recommendations use only owned clothes
 - Users can save outfits
 
-3.7 Chat Stylist
-- Users can send messages
-- System responds with "hello" (stub)
+3.7 Stylist
+- AI-powered styling assistant (structure and logic not yet finalized)
 
 3.8 Wear History
 - Users can mark items/outfits as worn
@@ -94,12 +94,12 @@ General consumers with no technical expertise required.
 6. Application Structure and Screens
 
 6.1 Navigation Structure
-The application will use a bottom tab navigation system with the following primary sections:
+The application uses a bottom tab navigation system with the following five primary sections:
 - Home
-- Closet
+- Wardrobe
 - Add
-- Outfits
-- Profile
+- Stylist
+- Me
 
 Each tab contains its own stack-based navigation for related screens.
 
@@ -121,15 +121,15 @@ Screens:
   - Displays generated outfit suggestions
   - Allows saving outfits
 
-- Stylist Chat
-  - Chat interface for styling requests
-  - Stub response system returning "hello"
+6.3 Wardrobe Section
+Purpose: Manage and browse the user's full wardrobe — both clothing items and outfits — via top subtabs.
 
-6.3 Closet Section
-Purpose: Manage and browse all clothing items.
+Top subtabs:
+- Clothing (default): grid of all clothing items with filter support
+- Outfits: list of saved outfits and generated recommendations
 
-Screens:
-- Closet Grid
+Screens under Clothing subtab:
+- Clothing Grid
   - Displays all clothing items in a grid layout
   - Supports filtering by category, color, and style
 
@@ -142,29 +142,7 @@ Screens:
 - Edit Clothing Item
   - Allows user to update clothing metadata
 
-6.4 Add Section
-Purpose: Capture and add new clothing items to the closet.
-
-Screens:
-- Add Entry
-  - Options to take photo or upload from gallery
-
-- Camera Screen
-  - Allows user to capture a clothing item image
-
-- Photo Preview
-  - Displays captured image
-  - Allows retake or proceed
-
-- AI Review Screen
-  - Displays detected clothing attributes (mocked)
-  - Allows user to review before saving
-  - Allows user to modify clothing attributes before saving
-
-6.5 Outfits Section
-Purpose: Manage and view saved outfits and generated recommendations.
-
-Screens:
+Screens under Outfits subtab:
 - Saved Outfits Feed
   - Displays all saved outfits in a scrollable list
 
@@ -178,24 +156,31 @@ Screens:
   - Displays generated outfit suggestions
   - Allows saving selected outfits
 
-6.6 Profile Section
-Purpose: Manage user account and preferences.
+6.4 Add Section
+Purpose: Capture and add new clothing items to the wardrobe.
 
 Screens:
-- Profile / Settings
-  - Displays user account information
-  - Allows logout
+- Add Entry
+  - Options to take photo or upload from gallery
 
-- Preferences
-  - Allows editing:
-    - favorite colors
-    - disliked colors
-    - preferred styles
-    - sizes
+- Camera Screen
+  - Allows user to capture a clothing item image
 
-- Settings
-  - Notification preferences
-  - Daily outfit prompt toggle
+- Photo Preview
+  - Displays captured image
+  - Allows retake or proceed
+
+- AI Review Screen
+  - Displays AI-detected clothing attributes
+  - Allows user to review and modify attributes before saving
+
+6.5 Stylist Section
+Purpose: AI-powered personal styling assistant.
+Status: Planned — structure and logic not yet finalized.
+
+6.6 Me Section
+Purpose: Manage user account, preferences, and settings.
+Status: Planned — structure and logic not yet finalized.
 
 6.7 Onboarding Flow
 - Collects user preferences:

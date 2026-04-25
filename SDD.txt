@@ -3,7 +3,7 @@ AI Wardrobe Stylist Mobile App (v1)
 
 1. System Architecture
 - Frontend: React Native (Expo)
-- Backend: FastAPI / Node.js
+- Backend: FastAPI / Node.js / Python
 - Database: Supabase (PostgreSQL)
 - Storage: Supabase Storage
 - Auth: Supabase Auth
@@ -169,18 +169,20 @@ Storage Buckets
 
 4. Frontend Screens
 
+Bottom tab navigation: Home | Wardrobe | Add | Stylist | Me
+
 - Splash Screen
 - Onboarding
 - Login/Signup
 - Home Dashboard
-- Add Clothing Item
+- Add Clothing Item (multi-step: entry → camera → preview → processing → review)
 - Item Review/Edit
-- Closet Grid
+- Wardrobe — Clothing subtab: grid with category/color/style filters
+- Wardrobe — Outfits subtab: saved outfits list (planned)
 - Item Detail
-- Recommendations Screen
-- Saved Outfits
-- Chat Screen
-- Profile/Settings
+- Outfit Detail (planned)
+- Stylist (planned — blank)
+- Me (planned — blank)
 
 5. Data Flow
 
@@ -189,9 +191,6 @@ User -> Upload Image -> API -> Storage -> Save Metadata -> Confirm Tags -> Save 
 
 Recommendation Flow:
 User Request -> API -> (stub logic) -> Return outfit list
-
-Chat Flow:
-User Message -> API -> Return "hello"
 
 6. Future Extensions
 - AI tagging model
