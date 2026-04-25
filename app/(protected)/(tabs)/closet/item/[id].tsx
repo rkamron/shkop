@@ -28,20 +28,8 @@ function formatDate(value: string | null) {
   return parsed.toLocaleDateString();
 }
 
-function formatAiTags(aiTags: ClothingItem["ai_tags"]) {
-  if (Array.isArray(aiTags)) {
-    return aiTags.length > 0 ? aiTags.join(", ") : "No tags";
-  }
-
-  const entries = Object.entries(aiTags ?? {});
-
-  if (entries.length === 0) {
-    return "No tags";
-  }
-
-  return entries
-    .map(([key, value]) => `${key}: ${String(value)}`)
-    .join(", ");
+function formatTags(tags: string[] | null | undefined) {
+  return tags && tags.length > 0 ? tags.join(", ") : "Not set";
 }
 
 export default function ClosetItemScreen() {
@@ -225,12 +213,36 @@ export default function ClosetItemScreen() {
           <ThemedText>{item.color ?? "Not set"}</ThemedText>
         </View>
         <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Style</ThemedText>
-          <ThemedText>{item.style ?? "Not set"}</ThemedText>
+          <ThemedText type="subtitle">Subcategory</ThemedText>
+          <ThemedText>{item.subcategory ?? "Not set"}</ThemedText>
         </View>
         <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">AI tags</ThemedText>
-          <ThemedText>{formatAiTags(item.ai_tags)}</ThemedText>
+          <ThemedText type="subtitle">Pattern</ThemedText>
+          <ThemedText>{item.pattern ?? "Not set"}</ThemedText>
+        </View>
+        <View style={styles.detailGroup}>
+          <ThemedText type="subtitle">Material</ThemedText>
+          <ThemedText>{item.material ?? "Not set"}</ThemedText>
+        </View>
+        <View style={styles.detailGroup}>
+          <ThemedText type="subtitle">Formality</ThemedText>
+          <ThemedText>{item.formality ?? "Not set"}</ThemedText>
+        </View>
+        <View style={styles.detailGroup}>
+          <ThemedText type="subtitle">Fit</ThemedText>
+          <ThemedText>{item.fit ?? "Not set"}</ThemedText>
+        </View>
+        <View style={styles.detailGroup}>
+          <ThemedText type="subtitle">Style tags</ThemedText>
+          <ThemedText>{formatTags(item.style_tags)}</ThemedText>
+        </View>
+        <View style={styles.detailGroup}>
+          <ThemedText type="subtitle">Occasion tags</ThemedText>
+          <ThemedText>{formatTags(item.occasion_tags)}</ThemedText>
+        </View>
+        <View style={styles.detailGroup}>
+          <ThemedText type="subtitle">Season tags</ThemedText>
+          <ThemedText>{formatTags(item.season_tags)}</ThemedText>
         </View>
         <View style={styles.detailGroup}>
           <ThemedText type="subtitle">Favorite</ThemedText>

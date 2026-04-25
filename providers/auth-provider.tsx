@@ -29,11 +29,13 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         return;
       }
 
+      // maybeSingle() returns null (not an error) when no row exists,
+      // which can happen briefly between signup and the profile trigger firing.
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", nextClaims.sub)
-        .single();
+        .maybeSingle();
 
       if (profileError) {
         console.error("Error fetching profile:", profileError);

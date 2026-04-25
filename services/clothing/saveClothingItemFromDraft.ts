@@ -7,10 +7,20 @@ import { ClothingItem } from "@/types/clothing";
 
 type SaveClothingItemFromDraftInput = {
   localImageUri: string;
-  category: string;
-  color: string;
-  style: string;
-  ai_tags: string[];
+  category?: string | null;
+  subcategory?: string | null;
+  color?: string | null;
+  secondary_colors?: string[];
+  pattern?: string | null;
+  material?: string | null;
+  formality?: string | null;
+  fit?: string | null;
+  style_tags?: string[];
+  season_tags?: string[];
+  occasion_tags?: string[];
+  weather_tags?: string[];
+  brand?: string | null;
+  notes?: string | null;
   is_favorite?: boolean;
 };
 
@@ -106,9 +116,19 @@ export async function saveClothingItemFromDraft(
     return await createClothingItem({
       image_path: imagePath,
       category: input.category,
+      subcategory: input.subcategory,
       color: input.color,
-      style: input.style,
-      ai_tags: input.ai_tags,
+      secondary_colors: input.secondary_colors,
+      pattern: input.pattern,
+      material: input.material,
+      formality: input.formality,
+      fit: input.fit,
+      style_tags: input.style_tags,
+      season_tags: input.season_tags,
+      occasion_tags: input.occasion_tags,
+      weather_tags: input.weather_tags,
+      brand: input.brand,
+      notes: input.notes,
       is_favorite: input.is_favorite ?? false,
     });
   } catch (error) {

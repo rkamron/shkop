@@ -8,13 +8,25 @@ export async function createClothingItem(
 
   const payload = {
     user_id: user.id,
+    name: input.name ?? null,
     image_path: input.image_path,
     category: input.category ?? null,
+    subcategory: input.subcategory ?? null,
     color: input.color ?? null,
-    style: input.style ?? null,
-    ai_tags: input.ai_tags ?? {},
+    secondary_colors: input.secondary_colors ?? null,
+    pattern: input.pattern ?? null,
+    material: input.material ?? null,
+    formality: input.formality ?? null,
+    fit: input.fit ?? null,
+    season_tags: input.season_tags ?? null,
+    occasion_tags: input.occasion_tags ?? null,
+    style_tags: input.style_tags ?? null,
+    weather_tags: input.weather_tags ?? null,
+    brand: input.brand ?? null,
+    ai_raw_output: input.ai_raw_output ?? null,
     is_favorite: input.is_favorite ?? false,
     last_worn: input.last_worn ?? null,
+    notes: input.notes ?? null,
   };
 
   const { data, error } = await clothingTable()

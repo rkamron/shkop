@@ -14,7 +14,8 @@ export default function ClosetEditItemScreen() {
   const [item, setItem] = useState<ClothingItem | null>(null);
   const [category, setCategory] = useState("");
   const [color, setColor] = useState("");
-  const [style, setStyle] = useState("");
+  const [fit, setFit] = useState("");
+  const [styleTags, setStyleTags] = useState("");
   const [isFavorite, setIsFavorite] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -55,7 +56,8 @@ export default function ClosetEditItemScreen() {
 
     setCategory(item.category ?? "");
     setColor(item.color ?? "");
-    setStyle(item.style ?? "");
+    setFit(item.fit ?? "");
+    setStyleTags((item.style_tags ?? []).join(", "));
     setIsFavorite(item.is_favorite);
   }, [item]);
 
@@ -64,12 +66,16 @@ export default function ClosetEditItemScreen() {
   }
 
   const handleSave = async () => {
-    const nextCategory = category.trim();
-    const nextColor = color.trim();
-    const nextStyle = style.trim();
+    const nextCategory = category.trim() || null;
+    const nextColor = color.trim() || null;
+    const nextFit = fit.trim() || null;
+    const nextStyleTags = styleTags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
 
-    if (!nextCategory || !nextColor || !nextStyle) {
-      setError("Category, color, and style are required.");
+    if (!nextCategory || !nextColor) {
+      setError("Category and color are required.");
       return;
     }
 
@@ -80,7 +86,8 @@ export default function ClosetEditItemScreen() {
       await updateClothingItem(id, {
         category: nextCategory,
         color: nextColor,
-        style: nextStyle,
+        fit: nextFit,
+        style_tags: nextStyleTags,
         is_favorite: isFavorite,
       });
 
@@ -152,7 +159,7 @@ export default function ClosetEditItemScreen() {
             style={styles.input}
             value={category}
             onChangeText={setCategory}
-            placeholder="Category"
+            placeholder="e.g. shirt, pants, shoes"
           />
         </View>
         <View style={styles.fieldGroup}>
@@ -161,16 +168,25 @@ export default function ClosetEditItemScreen() {
             style={styles.input}
             value={color}
             onChangeText={setColor}
-            placeholder="Color"
+            placeholder="e.g. black, navy, white"
           />
         </View>
         <View style={styles.fieldGroup}>
-          <ThemedText type="subtitle">Style</ThemedText>
+          <ThemedText type="subtitle">Fit</ThemedText>
           <TextInput
             style={styles.input}
-            value={style}
-            onChangeText={setStyle}
-            placeholder="Style"
+            value={fit}
+            onChangeText={setFit}
+            placeholder="e.g. slim, regular, relaxed, oversized"
+          />
+        </View>
+        <View style={styles.fieldGroup}>
+          <ThemedText type="subtitle">Style tags</ThemedText>
+          <TextInput
+            style={styles.input}
+            value={styleTags}
+            onChangeText={setStyleTags}
+            placeholder="e.g. casual, minimalist, streetwear"
           />
         </View>
         <View style={styles.favoriteRow}>

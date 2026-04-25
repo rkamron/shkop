@@ -5,15 +5,12 @@ import {
   AddClothingSourceType,
 } from "@/types/add-clothing-draft";
 
+type AiAttributes = Omit<AddClothingDraft, "localImageUri" | "sourceType">;
+
 type AddClothingDraftContextValue = {
   draft: AddClothingDraft;
   setImage: (localImageUri: string, sourceType: AddClothingSourceType) => void;
-  setMockedAttributes: (attributes: {
-    category: string | null;
-    color: string | null;
-    style: string | null;
-    ai_tags: string[];
-  }) => void;
+  setAiAttributes: (attributes: AiAttributes) => void;
   updateDraftField: <K extends keyof AddClothingDraft>(
     field: K,
     value: AddClothingDraft[K]
@@ -25,9 +22,19 @@ const initialDraft: AddClothingDraft = {
   localImageUri: null,
   sourceType: null,
   category: null,
+  subcategory: null,
   color: null,
-  style: null,
-  ai_tags: [],
+  secondary_colors: [],
+  pattern: null,
+  material: null,
+  formality: null,
+  fit: null,
+  style_tags: [],
+  season_tags: [],
+  occasion_tags: [],
+  weather_tags: [],
+  brand: null,
+  notes: null,
 };
 
 const AddClothingDraftContext =
@@ -46,13 +53,10 @@ export function AddClothingDraftProvider({ children }: PropsWithChildren) {
           sourceType,
         }));
       },
-      setMockedAttributes: ({ category, color, style, ai_tags }) => {
+      setAiAttributes: (attributes) => {
         setDraft((current) => ({
           ...current,
-          category,
-          color,
-          style,
-          ai_tags,
+          ...attributes,
         }));
       },
       updateDraftField: (field, value) => {

@@ -1,53 +1,88 @@
 import { Redirect, useRouter } from "expo-router";
-import { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Button, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { Screen } from "@/components/ui/Screen";
 import { useAddClothingDraft } from "@/providers/add-clothing-draft-provider";
-
-const PROCESSING_DELAY_MS = 1000;
+import { processClothingImage } from "@/services/ai/processClothingImage";
 
 export default function AddProcessingScreen() {
   const router = useRouter();
-  const { draft, setMockedAttributes } = useAddClothingDraft();
+  const { draft, setAiAttributes } = useAddClothingDraft();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!draft.localImageUri) {
       return;
     }
 
-    console.log("Entering mocked add processing step.");
+    let cancelled = false;
 
-    const timeoutId = setTimeout(() => {
-      console.log("Seeding mocked clothing metadata.");
-      setMockedAttributes({
-        category: "shirt",
-        color: "black",
-        style: "casual",
-        ai_tags: ["shirt", "black", "casual"],
-      });
-      router.replace("/add/review");
-    }, PROCESSING_DELAY_MS);
+    async function run() {
+      if (!draft.localImageUri) {
+        return;
+      }
+
+      try {
+        const attributes = await processClothingImage(draft.localImageUri);
+
+        if (!cancelled) {
+          setAiAttributes(attributes);
+          router.replace("/add/review");
+        }
+      } catch (err) {
+        console.error("[processing] processClothingImage failed:", err);
+        if (!cancelled) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Something went wrong processing your image."
+          );
+        }
+      }
+    }
+
+    void run();
 
     return () => {
-      clearTimeout(timeoutId);
+      cancelled = true;
     };
-  }, [draft.localImageUri, router, setMockedAttributes]);
+  }, [draft.localImageUri, router, setAiAttributes]);
 
   if (!draft.localImageUri) {
     return <Redirect href="/add" />;
   }
 
+  if (error) {
+    return (
+      <Screen
+        title="Processing"
+        subtitle="There was a problem processing your image."
+        scrollable={false}
+      >
+        <View style={styles.centerState}>
+          <ThemedText style={styles.errorText}>{error}</ThemedText>
+          <Button
+            title="Go back"
+            onPress={() => {
+              router.replace("/add/preview");
+            }}
+          />
+        </View>
+      </Screen>
+    );
+  }
+
   return (
     <Screen
       title="Processing"
-      subtitle="Processing your image and preparing generated clothing details."
+      subtitle="Analyzing your clothing item and generating tags."
       scrollable={false}
     >
       <View style={styles.centerState}>
         <ActivityIndicator size="small" color="#0a7ea4" />
-        <ThemedText>Processing your image...</ThemedText>
+        <ThemedText>Analyzing your clothing item...</ThemedText>
       </View>
     </Screen>
   );
@@ -59,5 +94,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 12,
+  },
+  errorText: {
+    color: "#b42318",
+    textAlign: "center",
   },
 });

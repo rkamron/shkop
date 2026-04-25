@@ -40,6 +40,11 @@ export function toClothingImagePath(
 export function normalizeClothingItem(row: ClothingItem) {
   return {
     ...row,
-    ai_tags: row.ai_tags ?? {},
+    ai_raw_output: row.ai_raw_output ?? null,
+    secondary_colors: row.secondary_colors ?? null,
+    season_tags: row.season_tags ?? null,
+    occasion_tags: row.occasion_tags ?? null,
+    style_tags: row.style_tags ?? null,
+    weather_tags: row.weather_tags ?? null,
   };
 }

@@ -11,7 +11,7 @@ export default function ClosetStackLayout() {
         headerTitleAlign: "center",
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Closet" }} />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="item/[id]" options={{ title: "Item Details" }} />
       <Stack.Screen name="edit/[id]" options={{ title: "Edit Item" }} />
     </Stack>

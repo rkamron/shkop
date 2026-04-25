@@ -7,17 +7,9 @@ export async function updateClothingItem(
 ): Promise<ClothingItem> {
   const user = await requireAuthenticatedUser();
 
-  const payload = {
-    ...(updates.image_path !== undefined ? { image_path: updates.image_path } : {}),
-    ...(updates.category !== undefined ? { category: updates.category } : {}),
-    ...(updates.color !== undefined ? { color: updates.color } : {}),
-    ...(updates.style !== undefined ? { style: updates.style } : {}),
-    ...(updates.ai_tags !== undefined ? { ai_tags: updates.ai_tags } : {}),
-    ...(updates.is_favorite !== undefined
-      ? { is_favorite: updates.is_favorite }
-      : {}),
-    ...(updates.last_worn !== undefined ? { last_worn: updates.last_worn } : {}),
-  };
+  const payload = Object.fromEntries(
+    Object.entries(updates).filter(([, v]) => v !== undefined)
+  );
 
   const { data, error } = await clothingTable()
     .update(payload)

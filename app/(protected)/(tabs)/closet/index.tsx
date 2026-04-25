@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 
+import { FilterSelect } from "@/components/ui/FilterSelect";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Screen } from "@/components/ui/Screen";
@@ -23,9 +24,16 @@ type ClothingGridItem = {
 
 function getFilterOptions(
   items: ClothingGridItem[],
-  field: "category" | "color" | "style"
-) {
+  field: "category" | "color"
+): string[] {
   return [...new Set(items.map((entry) => entry.item[field]).filter(Boolean))] as string[];
+}
+
+function getTagFilterOptions(
+  items: ClothingGridItem[],
+  field: "style_tags"
+): string[] {
+  return [...new Set(items.flatMap((entry) => entry.item[field] ?? []))];
 }
 
 export default function ClosetIndexScreen() {
@@ -81,13 +89,14 @@ export default function ClosetIndexScreen() {
 
   const categoryOptions = getFilterOptions(items, "category");
   const colorOptions = getFilterOptions(items, "color");
-  const styleOptions = getFilterOptions(items, "style");
+  const styleOptions = getTagFilterOptions(items, "style_tags");
 
   const filteredItems = items.filter((entry) => {
     const matchesCategory =
       !selectedCategory || entry.item.category === selectedCategory;
     const matchesColor = !selectedColor || entry.item.color === selectedColor;
-    const matchesStyle = !selectedStyle || entry.item.style === selectedStyle;
+    const matchesStyle =
+      !selectedStyle || (entry.item.style_tags ?? []).includes(selectedStyle);
 
     return matchesCategory && matchesColor && matchesStyle;
   });
@@ -96,6 +105,9 @@ export default function ClosetIndexScreen() {
     selectedCategory !== null ||
     selectedColor !== null ||
     selectedStyle !== null;
+
+  const activeItemCount = filteredItems.length;
+  const totalItemCount = items.length;
 
   const renderItem = ({ item }: { item: ClothingGridItem }) => (
     <Pressable
@@ -113,15 +125,21 @@ export default function ClosetIndexScreen() {
         style={styles.cardImage}
       />
       <View style={styles.cardBody}>
-        <ThemedText type="subtitle" numberOfLines={1}>
+        <ThemedText style={styles.cardTitle} numberOfLines={1}>
           {item.item.category ?? "Uncategorized"}
         </ThemedText>
-        <ThemedText numberOfLines={1}>
-          {item.item.color ?? "Unknown color"}
-        </ThemedText>
-        <ThemedText numberOfLines={1}>
-          {item.item.style ?? "Unknown style"}
-        </ThemedText>
+        <View style={styles.cardTagRow}>
+          <View style={styles.cardTag}>
+            <ThemedText style={styles.cardTagLabel} numberOfLines={1}>
+              {item.item.color ?? "Unknown color"}
+            </ThemedText>
+          </View>
+          <View style={styles.cardTag}>
+            <ThemedText style={styles.cardTagLabel} numberOfLines={1}>
+              {item.item.fit ?? item.item.style_tags?.[0] ?? "—"}
+            </ThemedText>
+          </View>
+        </View>
       </View>
     </Pressable>
   );
@@ -130,7 +148,7 @@ export default function ClosetIndexScreen() {
     return (
       <Screen
         title="Closet"
-        subtitle="Your uploaded clothing items will appear here."
+        subtitle="Your uploaded clothing items, ready to browse and manage."
         scrollable={false}
       >
         <View style={styles.centerState}>
@@ -145,7 +163,7 @@ export default function ClosetIndexScreen() {
     return (
       <Screen
         title="Closet"
-        subtitle="Your uploaded clothing items will appear here."
+        subtitle="Your uploaded clothing items, ready to browse and manage."
         scrollable={false}
       >
         <View style={styles.centerState}>
@@ -166,153 +184,72 @@ export default function ClosetIndexScreen() {
   return (
     <Screen
       title="Closet"
-      subtitle="Your uploaded clothing items will appear here."
+      subtitle="Your uploaded clothing items, ready to browse and manage."
       scrollable={false}
       contentStyle={styles.screenContent}
     >
+      <View style={styles.heroCard}>
+        <View style={styles.heroTextBlock}>
+          <ThemedText style={styles.heroEyebrow}>Wardrobe overview</ThemedText>
+          <ThemedText style={styles.heroTitle}>
+            {activeItemCount} {activeItemCount === 1 ? "item" : "items"}
+          </ThemedText>
+          <ThemedText style={styles.heroCopy}>
+            {hasActiveFilters
+              ? `Filtered from ${totalItemCount} total pieces`
+              : "Everything you have added so far"}
+          </ThemedText>
+        </View>
+        <Pressable
+          style={styles.addButton}
+          onPress={() => {
+            router.push("/add");
+          }}
+        >
+          <ThemedText style={styles.addButtonLabel}>Add item</ThemedText>
+        </Pressable>
+      </View>
       {error ? (
         <ThemedView style={styles.inlineErrorBanner}>
           <ThemedText style={styles.errorText}>{error}</ThemedText>
         </ThemedView>
       ) : null}
       <View style={styles.filtersSection}>
-        <View style={styles.filterGroup}>
-          <ThemedText type="subtitle">Category</ThemedText>
-          <View style={styles.filterChips}>
+        <View style={styles.filtersHeaderRow}>
+          <ThemedText style={styles.filtersTitle}>Filters</ThemedText>
+          {hasActiveFilters ? (
             <Pressable
-              style={[
-                styles.filterChip,
-                selectedCategory === null && styles.filterChipActive,
-              ]}
               onPress={() => {
                 setSelectedCategory(null);
-              }}
-            >
-              <ThemedText
-                style={
-                  selectedCategory === null
-                    ? styles.filterChipLabelActive
-                    : styles.filterChipLabel
-                }
-              >
-                All
-              </ThemedText>
-            </Pressable>
-            {categoryOptions.map((option) => (
-              <Pressable
-                key={`category-${option}`}
-                style={[
-                  styles.filterChip,
-                  selectedCategory === option && styles.filterChipActive,
-                ]}
-                onPress={() => {
-                  setSelectedCategory(option);
-                }}
-              >
-                <ThemedText
-                  style={
-                    selectedCategory === option
-                      ? styles.filterChipLabelActive
-                      : styles.filterChipLabel
-                  }
-                >
-                  {option}
-                </ThemedText>
-              </Pressable>
-            ))}
-          </View>
-        </View>
-        <View style={styles.filterGroup}>
-          <ThemedText type="subtitle">Color</ThemedText>
-          <View style={styles.filterChips}>
-            <Pressable
-              style={[
-                styles.filterChip,
-                selectedColor === null && styles.filterChipActive,
-              ]}
-              onPress={() => {
                 setSelectedColor(null);
-              }}
-            >
-              <ThemedText
-                style={
-                  selectedColor === null
-                    ? styles.filterChipLabelActive
-                    : styles.filterChipLabel
-                }
-              >
-                All
-              </ThemedText>
-            </Pressable>
-            {colorOptions.map((option) => (
-              <Pressable
-                key={`color-${option}`}
-                style={[
-                  styles.filterChip,
-                  selectedColor === option && styles.filterChipActive,
-                ]}
-                onPress={() => {
-                  setSelectedColor(option);
-                }}
-              >
-                <ThemedText
-                  style={
-                    selectedColor === option
-                      ? styles.filterChipLabelActive
-                      : styles.filterChipLabel
-                  }
-                >
-                  {option}
-                </ThemedText>
-              </Pressable>
-            ))}
-          </View>
-        </View>
-        <View style={styles.filterGroup}>
-          <ThemedText type="subtitle">Style</ThemedText>
-          <View style={styles.filterChips}>
-            <Pressable
-              style={[
-                styles.filterChip,
-                selectedStyle === null && styles.filterChipActive,
-              ]}
-              onPress={() => {
                 setSelectedStyle(null);
               }}
             >
-              <ThemedText
-                style={
-                  selectedStyle === null
-                    ? styles.filterChipLabelActive
-                    : styles.filterChipLabel
-                }
-              >
-                All
-              </ThemedText>
+              <ThemedText style={styles.clearFiltersLabel}>Clear all</ThemedText>
             </Pressable>
-            {styleOptions.map((option) => (
-              <Pressable
-                key={`style-${option}`}
-                style={[
-                  styles.filterChip,
-                  selectedStyle === option && styles.filterChipActive,
-                ]}
-                onPress={() => {
-                  setSelectedStyle(option);
-                }}
-              >
-                <ThemedText
-                  style={
-                    selectedStyle === option
-                      ? styles.filterChipLabelActive
-                      : styles.filterChipLabel
-                  }
-                >
-                  {option}
-                </ThemedText>
-              </Pressable>
-            ))}
-          </View>
+          ) : null}
+        </View>
+        <View style={styles.filterRow}>
+          <FilterSelect
+            label="Category"
+            value={selectedCategory}
+            options={categoryOptions}
+            onChange={setSelectedCategory}
+          />
+          <FilterSelect
+            label="Color"
+            value={selectedColor}
+            options={colorOptions}
+            onChange={setSelectedColor}
+          />
+        </View>
+        <View style={styles.filterRow}>
+          <FilterSelect
+            label="Style"
+            value={selectedStyle}
+            options={styleOptions}
+            onChange={setSelectedStyle}
+          />
         </View>
       </View>
       <FlatList
@@ -354,6 +291,44 @@ const styles = StyleSheet.create({
   screenContent: {
     paddingBottom: 0,
   },
+  heroCard: {
+    borderRadius: 22,
+    padding: 18,
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    gap: 16,
+  },
+  heroTextBlock: {
+    gap: 4,
+  },
+  heroEyebrow: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: "#667085",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  heroTitle: {
+    fontSize: 30,
+    lineHeight: 34,
+    fontWeight: "700",
+    color: "#101828",
+  },
+  heroCopy: {
+    color: "#667085",
+  },
+  addButton: {
+    alignSelf: "flex-start",
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: "#0f172a",
+  },
+  addButtonLabel: {
+    color: "#ffffff",
+    fontWeight: "600",
+  },
   centerState: {
     flex: 1,
     alignItems: "center",
@@ -373,7 +348,7 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     backgroundColor: "#ffffff",
     borderWidth: 1,
@@ -386,7 +361,29 @@ const styles = StyleSheet.create({
   },
   cardBody: {
     padding: 12,
-    gap: 4,
+    gap: 10,
+  },
+  cardTitle: {
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: "700",
+    color: "#101828",
+  },
+  cardTagRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  cardTag: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: "#f2f4f7",
+  },
+  cardTagLabel: {
+    fontSize: 13,
+    lineHeight: 16,
+    color: "#344054",
   },
   inlineErrorBanner: {
     paddingHorizontal: 12,
@@ -397,33 +394,30 @@ const styles = StyleSheet.create({
     backgroundColor: "#fef3f2",
   },
   filtersSection: {
-    gap: 12,
+    gap: 14,
+    paddingVertical: 4,
+  },
+  filtersHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  filtersTitle: {
+    fontSize: 18,
+    lineHeight: 22,
+    fontWeight: "700",
+    color: "#101828",
+  },
+  clearFiltersLabel: {
+    color: "#0a7ea4",
+    fontWeight: "600",
   },
   filterGroup: {
     gap: 8,
   },
-  filterChips: {
+  filterRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  filterChip: {
-    borderWidth: 1,
-    borderColor: "#d0d5dd",
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: "#ffffff",
-  },
-  filterChipActive: {
-    borderColor: "#0a7ea4",
-    backgroundColor: "#e6f4fe",
-  },
-  filterChipLabel: {
-    color: "#344054",
-  },
-  filterChipLabelActive: {
-    color: "#0a7ea4",
+    gap: 12,
   },
   emptyState: {
     gap: 8,

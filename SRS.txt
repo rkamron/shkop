@@ -159,8 +159,6 @@ Screens:
 - AI Review Screen
   - Displays detected clothing attributes (mocked)
   - Allows user to review before saving
-
-- Edit Clothing Info
   - Allows user to modify clothing attributes before saving
 
 6.5 Outfits Section
