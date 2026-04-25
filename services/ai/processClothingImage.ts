@@ -1,3 +1,5 @@
+// Sends the clothing image to the FastAPI backend for Claude vision tagging.
+// Attaches the Supabase JWT so the backend can verify the user.
 import { supabase } from "@/lib/supabase";
 import { AddClothingDraft } from "@/types/add-clothing-draft";
 

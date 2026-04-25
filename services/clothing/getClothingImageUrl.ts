@@ -1,3 +1,5 @@
+// Generates a signed URL for a private clothing bucket object. Default TTL is
+// 1 hour — callers can override for shorter-lived links.
 import { clothingBucket } from "@/services/clothing/_shared";
 
 const DEFAULT_SIGNED_URL_TTL_SECONDS = 60 * 60;

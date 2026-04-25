@@ -1,3 +1,6 @@
+// Saves a clothing item from the add flow draft. Uploads the image first, then
+// inserts the DB row. If the insert fails the uploaded image is cleaned up so
+// storage doesn't accumulate orphaned files.
 import "react-native-get-random-values";
 
 import { createClothingItem } from "@/services/clothing/createClothingItem";

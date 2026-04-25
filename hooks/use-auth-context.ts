@@ -1,3 +1,5 @@
+// Auth context definition and hook — throws if used outside AuthProvider so
+// missing-provider bugs surface immediately rather than as silent undefined.
 import { createContext, useContext } from "react";
 
 export type AuthData = {

@@ -1,3 +1,7 @@
+// Screen — standard page wrapper with safe-area insets, optional header (title +
+// subtitle), optional footer pinned to the bottom, and a scrollable/non-scrollable
+// content area. Use scrollable={false} when the screen manages its own scroll
+// (e.g. FlatList or custom ScrollView).
 import { type PropsWithChildren, type ReactNode } from "react";
 import { ScrollView, StyleSheet, View, type ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

@@ -1,3 +1,5 @@
+// Root layout — app entry point. Wraps all routes with theme and auth context,
+// then renders a top-level Stack with (public) and (protected) route groups.
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";

@@ -1,3 +1,6 @@
+// Review screen — displays all 14 AI-generated attributes in editable fields.
+// Array fields (tags, secondary colors) are held as comma-separated strings
+// while editing and split back to arrays on save.
 import { Image } from "expo-image";
 import { Redirect, useRouter } from "expo-router";
 import { useEffect, useState } from "react";

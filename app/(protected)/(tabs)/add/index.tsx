@@ -1,3 +1,5 @@
+// Add flow entry — user chooses between taking a photo or picking from the
+// gallery. Sets the draft image and source type, then pushes to /add/preview.
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";

@@ -1,3 +1,7 @@
+// Auth provider — fetches the Supabase JWT claims and the matching public.profiles
+// row, then re-syncs on every auth state change event. Uses maybeSingle() on the
+// profiles query so it returns null (not an error) when no row exists yet — this
+// can happen briefly between signup and the profile trigger firing.
 import { AuthContext } from "@/hooks/use-auth-context";
 import { supabase } from "@/lib/supabase";
 import { PropsWithChildren, useEffect, useState } from "react";

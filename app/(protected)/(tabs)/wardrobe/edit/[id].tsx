@@ -1,3 +1,5 @@
+// Edit item — lets the user update core clothing metadata. Navigates back to
+// the item detail screen on save rather than popping to the wardrobe index.
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Button, StyleSheet, Switch, TextInput, View } from "react-native";

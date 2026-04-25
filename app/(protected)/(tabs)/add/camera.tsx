@@ -1,3 +1,5 @@
+// Camera screen — requests permission on mount, shows a live preview with a
+// center-crop guide, and captures a photo into the shared draft on tap.
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";

@@ -1,3 +1,6 @@
+// Add clothing draft provider — holds the in-progress add flow state (local image
+// URI, source type, and all AI-returned attributes) across the multi-step stack.
+// Mounted at the add/ stack level so it resets automatically when the user leaves.
 import { createContext, PropsWithChildren, useContext, useMemo, useState } from "react";
 
 import {

@@ -1,3 +1,6 @@
+// Dropdown filter selector — renders a trigger button that opens a modal sheet
+// with a scrollable list of options. Selecting an option calls onChange and
+// closes the sheet. Passing null to onChange resets the filter to "All".
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {

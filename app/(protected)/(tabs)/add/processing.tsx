@@ -1,3 +1,6 @@
+// Processing screen — calls the FastAPI backend to run Claude vision tagging.
+// The `cancelled` flag prevents state updates if the user navigates away before
+// the request finishes.
 import { Redirect, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Button, StyleSheet, View } from "react-native";

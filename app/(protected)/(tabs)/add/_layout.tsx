@@ -1,3 +1,6 @@
+// Add flow stack — wraps all add screens with AddClothingDraftProvider so the
+// in-progress draft (image URI, AI attributes) persists across every step.
+// Flow: index → camera → preview → processing → review
 import { Stack } from "expo-router";
 
 import { AddClothingDraftProvider } from "@/providers/add-clothing-draft-provider";

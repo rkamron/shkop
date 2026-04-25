@@ -59,7 +59,6 @@ SUPABASE_URL=
 - `index.tsx` — custom top tab bar (Clothing | Outfits); Clothing tab has the full clothing grid with filters; Outfits tab is a placeholder
 - `item/[id].tsx` — clothing item detail: image, all metadata, favorite toggle, delete
 - `edit/[id].tsx` — edit core clothing metadata
-- The old `closet/`, `outfits/`, and `profile/` tab folders remain on disk but are hidden from the tab bar via `href: null`
 
 **Add flow** (`(tabs)/add/`):
 1. `index.tsx` — entry: camera or photo library picker

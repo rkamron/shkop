@@ -1,3 +1,5 @@
+// Supabase client — uses expo-secure-store as the session storage adapter so
+// auth tokens are encrypted at rest on-device and survive app restarts.
 import { createClient } from "@supabase/supabase-js";
 import { deleteItemAsync, getItemAsync, setItemAsync } from "expo-secure-store";
 

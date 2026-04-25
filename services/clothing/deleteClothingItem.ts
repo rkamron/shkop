@@ -1,3 +1,6 @@
+// Deletes a clothing item row and its associated storage object. The row is
+// deleted first (returning image_path) so the storage path is always known
+// before the delete attempt.
 import { clothingBucket, clothingTable, requireAuthenticatedUser } from "@/services/clothing/_shared";
 
 export async function deleteClothingItem(id: string): Promise<void> {

@@ -1,3 +1,5 @@
+// Keeps the splash screen visible until AuthProvider finishes loading the
+// session, preventing a flash of unauthenticated UI on cold start.
 import { useEffect } from "react";
 import { SplashScreen } from "expo-router";
 

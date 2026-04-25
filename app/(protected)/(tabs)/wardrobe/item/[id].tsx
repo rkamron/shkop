@@ -1,11 +1,22 @@
+// Item detail — full-width image with all 15 clothing attributes listed below.
+// Uses absolute navigation paths (/wardrobe/...) to avoid Expo Router v6
+// relative-path resolution issues inside nested Stack tabs.
 import { Image } from "expo-image";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Alert, Button, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
-import { Screen } from "@/components/ui/Screen";
+import { ThemedView } from "@/components/themed-view";
 import {
   deleteClothingItem,
   getClothingImageUrl,
@@ -15,16 +26,9 @@ import {
 import { ClothingItem } from "@/types/clothing";
 
 function formatDate(value: string | null) {
-  if (!value) {
-    return "Not set";
-  }
-
+  if (!value) return "Not set";
   const parsed = new Date(value);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-
+  if (Number.isNaN(parsed.getTime())) return value;
   return parsed.toLocaleDateString();
 }
 
@@ -32,7 +36,16 @@ function formatTags(tags: string[] | null | undefined) {
   return tags && tags.length > 0 ? tags.join(", ") : "Not set";
 }
 
-export default function ClosetItemScreen() {
+function AttributeRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.attributeRow}>
+      <ThemedText style={styles.attributeLabel}>{label}</ThemedText>
+      <ThemedText style={styles.attributeValue}>{value}</ThemedText>
+    </View>
+  );
+}
+
+export default function WardrobeItemScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [item, setItem] = useState<ClothingItem | null>(null);
@@ -43,260 +56,191 @@ export default function ClosetItemScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const loadItem = useCallback(async () => {
-    if (!id) {
-      return;
-    }
-
+    if (!id) return;
     setIsLoading(true);
     setError(null);
-
     try {
       const clothingItem = await getClothingItemById(id);
-      const signedImageUrl = await getClothingImageUrl(clothingItem.image_path);
-
+      const signedUrl = await getClothingImageUrl(clothingItem.image_path);
       setItem(clothingItem);
-      setImageUrl(signedImageUrl);
-    } catch (loadError) {
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Failed to load clothing item."
-      );
+      setImageUrl(signedUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load item.");
     } finally {
       setIsLoading(false);
     }
   }, [id]);
 
-  useFocusEffect(
-    useCallback(() => {
-      void loadItem();
-    }, [loadItem])
-  );
+  useFocusEffect(useCallback(() => { void loadItem(); }, [loadItem]));
 
-  if (!id) {
-    return <Redirect href="../" />;
-  }
+  if (!id) return <Redirect href="../" />;
 
   const handleToggleFavorite = async () => {
-    if (!item) {
-      return;
-    }
-
+    if (!item) return;
     setIsTogglingFavorite(true);
-    setError(null);
-
     try {
-      const updated = await updateClothingItem(item.id, {
-        is_favorite: !item.is_favorite,
-      });
-
+      const updated = await updateClothingItem(item.id, { is_favorite: !item.is_favorite });
       setItem(updated);
-    } catch (toggleError) {
-      setError(
-        toggleError instanceof Error
-          ? toggleError.message
-          : "Failed to update favorite status."
-      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update favorite.");
     } finally {
       setIsTogglingFavorite(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!item) {
-      return;
-    }
-
+    if (!item) return;
     setIsDeleting(true);
-    setError(null);
-
     try {
       await deleteClothingItem(item.id);
-      router.replace("../");
-    } catch (deleteError) {
-      setError(
-        deleteError instanceof Error
-          ? deleteError.message
-          : "Failed to delete clothing item."
-      );
+      router.replace("/wardrobe");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete item.");
       setIsDeleting(false);
     }
   };
 
   const confirmDelete = () => {
-    if (!item || isDeleting) {
-      return;
-    }
-
+    if (!item || isDeleting) return;
     Alert.alert(
       "Delete clothing item?",
       "This will permanently remove the item and its stored image.",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            void handleDelete();
-          },
-        },
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: () => { void handleDelete(); } },
       ]
     );
   };
 
   if (isLoading) {
     return (
-      <Screen title="Clothing Item" subtitle="Loading item details..." scrollable={false}>
-        <View style={styles.centerState}>
+      <ThemedView style={styles.container}>
+        <SafeAreaView style={styles.centerState}>
           <ActivityIndicator size="small" color="#0a7ea4" />
-          <ThemedText>Loading item details...</ThemedText>
-        </View>
-      </Screen>
-    );
-  }
-
-  if (error && !item) {
-    return (
-      <Screen title="Clothing Item" subtitle="There was a problem loading this item." scrollable={false}>
-        <View style={styles.centerState}>
-          <ThemedText style={styles.errorText}>{error}</ThemedText>
-          <Button
-            title="Try again"
-            onPress={() => {
-              void loadItem();
-            }}
-          />
-        </View>
-      </Screen>
+          <ThemedText>Loading...</ThemedText>
+        </SafeAreaView>
+      </ThemedView>
     );
   }
 
   if (!item) {
     return (
-      <Screen title="Clothing Item" subtitle="This item could not be found." scrollable={false}>
-        <View style={styles.centerState}>
-          <Button
-            title="Back to closet"
-            onPress={() => {
-              router.replace("../");
-            }}
-          />
-        </View>
-      </Screen>
+      <ThemedView style={styles.container}>
+        <SafeAreaView style={styles.centerState}>
+          <ThemedText style={styles.errorText}>{error ?? "Item not found."}</ThemedText>
+          <Pressable style={styles.outlineButton} onPress={() => { void loadItem(); }}>
+            <ThemedText style={styles.outlineButtonLabel}>Try again</ThemedText>
+          </Pressable>
+        </SafeAreaView>
+      </ThemedView>
     );
   }
 
   return (
-    <Screen
-      title={item.category ?? "Clothing Item"}
-      subtitle="Review the full clothing item details and manage this entry."
-    >
-      <View style={styles.content}>
+    <ThemedView style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {imageUrl ? (
-          <View style={styles.imageFrame}>
-            <Image
-              source={{ uri: imageUrl }}
-              contentFit="cover"
-              style={styles.image}
-            />
+          <Image
+            source={{ uri: imageUrl }}
+            contentFit="cover"
+            style={styles.image}
+          />
+        ) : (
+          <View style={styles.imagePlaceholder} />
+        )}
+
+        <View style={styles.body}>
+          <View style={styles.titleRow}>
+            <ThemedText style={styles.itemTitle}>
+              {item.category ?? "Clothing Item"}
+            </ThemedText>
+            <Pressable
+              style={[styles.favoriteButton, item.is_favorite && styles.favoriteButtonActive]}
+              disabled={isTogglingFavorite || isDeleting}
+              onPress={() => { void handleToggleFavorite(); }}
+            >
+              <ThemedText style={[styles.favoriteButtonLabel, item.is_favorite && styles.favoriteButtonLabelActive]}>
+                {item.is_favorite ? "♥ Saved" : "♡ Save"}
+              </ThemedText>
+            </Pressable>
           </View>
-        ) : null}
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Category</ThemedText>
-          <ThemedText>{item.category ?? "Not set"}</ThemedText>
+
+          {error ? (
+            <ThemedText style={styles.errorText}>{error}</ThemedText>
+          ) : null}
+
+          <View style={styles.attributesCard}>
+            <AttributeRow label="Category" value={item.category ?? "Not set"} />
+            <View style={styles.divider} />
+            <AttributeRow label="Subcategory" value={item.subcategory ?? "Not set"} />
+            <View style={styles.divider} />
+            <AttributeRow label="Color" value={item.color ?? "Not set"} />
+            <View style={styles.divider} />
+            <AttributeRow label="Secondary colors" value={formatTags(item.secondary_colors)} />
+            <View style={styles.divider} />
+            <AttributeRow label="Pattern" value={item.pattern ?? "Not set"} />
+            <View style={styles.divider} />
+            <AttributeRow label="Material" value={item.material ?? "Not set"} />
+            <View style={styles.divider} />
+            <AttributeRow label="Fit" value={item.fit ?? "Not set"} />
+            <View style={styles.divider} />
+            <AttributeRow label="Formality" value={item.formality ?? "Not set"} />
+            <View style={styles.divider} />
+            <AttributeRow label="Brand" value={item.brand ?? "Not set"} />
+            <View style={styles.divider} />
+            <AttributeRow label="Style tags" value={formatTags(item.style_tags)} />
+            <View style={styles.divider} />
+            <AttributeRow label="Season tags" value={formatTags(item.season_tags)} />
+            <View style={styles.divider} />
+            <AttributeRow label="Occasion tags" value={formatTags(item.occasion_tags)} />
+            <View style={styles.divider} />
+            <AttributeRow label="Weather tags" value={formatTags(item.weather_tags)} />
+            <View style={styles.divider} />
+            <AttributeRow label="Last worn" value={formatDate(item.last_worn)} />
+            <View style={styles.divider} />
+            <AttributeRow label="Added" value={formatDate(item.created_at)} />
+            {item.notes ? (
+              <>
+                <View style={styles.divider} />
+                <AttributeRow label="Notes" value={item.notes} />
+              </>
+            ) : null}
+          </View>
+
+          <View style={styles.actions}>
+            <Pressable
+              style={styles.editButton}
+              onPress={() => {
+                router.push(`/wardrobe/edit/${item.id}`);
+              }}
+            >
+              <ThemedText style={styles.editButtonLabel}>Edit item</ThemedText>
+            </Pressable>
+            <Pressable
+              style={styles.deleteButton}
+              disabled={isDeleting || isTogglingFavorite}
+              onPress={confirmDelete}
+            >
+              <ThemedText style={styles.deleteButtonLabel}>
+                {isDeleting ? "Deleting..." : "Delete item"}
+              </ThemedText>
+            </Pressable>
+          </View>
         </View>
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Color</ThemedText>
-          <ThemedText>{item.color ?? "Not set"}</ThemedText>
-        </View>
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Subcategory</ThemedText>
-          <ThemedText>{item.subcategory ?? "Not set"}</ThemedText>
-        </View>
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Pattern</ThemedText>
-          <ThemedText>{item.pattern ?? "Not set"}</ThemedText>
-        </View>
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Material</ThemedText>
-          <ThemedText>{item.material ?? "Not set"}</ThemedText>
-        </View>
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Formality</ThemedText>
-          <ThemedText>{item.formality ?? "Not set"}</ThemedText>
-        </View>
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Fit</ThemedText>
-          <ThemedText>{item.fit ?? "Not set"}</ThemedText>
-        </View>
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Style tags</ThemedText>
-          <ThemedText>{formatTags(item.style_tags)}</ThemedText>
-        </View>
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Occasion tags</ThemedText>
-          <ThemedText>{formatTags(item.occasion_tags)}</ThemedText>
-        </View>
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Season tags</ThemedText>
-          <ThemedText>{formatTags(item.season_tags)}</ThemedText>
-        </View>
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Favorite</ThemedText>
-          <ThemedText>{item.is_favorite ? "Yes" : "No"}</ThemedText>
-        </View>
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Last worn</ThemedText>
-          <ThemedText>{formatDate(item.last_worn)}</ThemedText>
-        </View>
-        <View style={styles.detailGroup}>
-          <ThemedText type="subtitle">Created</ThemedText>
-          <ThemedText>{formatDate(item.created_at)}</ThemedText>
-        </View>
-        {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
-        <View style={styles.actions}>
-          <Button
-            title="Edit item"
-            onPress={() => {
-              router.push({
-                pathname: "../edit/[id]",
-                params: { id: item.id },
-              });
-            }}
-          />
-          <Button
-            title={
-              isTogglingFavorite
-                ? "Updating favorite..."
-                : item.is_favorite
-                  ? "Remove favorite"
-                  : "Mark as favorite"
-            }
-            disabled={isTogglingFavorite || isDeleting}
-            onPress={() => {
-              void handleToggleFavorite();
-            }}
-          />
-          <Button
-            title={isDeleting ? "Deleting..." : "Delete item"}
-            color="#b42318"
-            disabled={isDeleting || isTogglingFavorite}
-            onPress={() => {
-              confirmDelete();
-            }}
-          />
-        </View>
-      </View>
-    </Screen>
+      </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
-    gap: 16,
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 40,
   },
   centerState: {
     flex: 1,
@@ -304,23 +248,123 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 12,
   },
-  imageFrame: {
-    height: 360,
-    borderRadius: 20,
-    overflow: "hidden",
-    backgroundColor: "#e4e7ec",
-  },
   image: {
     width: "100%",
-    height: "100%",
+    aspectRatio: 1,
+    backgroundColor: "#e4e7ec",
   },
-  detailGroup: {
-    gap: 6,
+  imagePlaceholder: {
+    width: "100%",
+    aspectRatio: 1,
+    backgroundColor: "#e4e7ec",
+  },
+  body: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    gap: 20,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  itemTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#101828",
+    flex: 1,
+  },
+  favoriteButton: {
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: "#d0d5dd",
+    backgroundColor: "#ffffff",
+  },
+  favoriteButtonActive: {
+    borderColor: "#f97066",
+    backgroundColor: "#fff1f0",
+  },
+  favoriteButtonLabel: {
+    fontSize: 13,
+    color: "#667085",
+    fontWeight: "500",
+  },
+  favoriteButtonLabelActive: {
+    color: "#b42318",
+  },
+  attributesCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    backgroundColor: "#ffffff",
+    overflow: "hidden",
+  },
+  attributeRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
+  },
+  attributeLabel: {
+    fontSize: 14,
+    color: "#667085",
+    flex: 1,
+  },
+  attributeValue: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#101828",
+    flex: 2,
+    textAlign: "right",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#f2f4f7",
+    marginHorizontal: 16,
   },
   actions: {
-    gap: 12,
+    gap: 10,
+  },
+  editButton: {
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    backgroundColor: "#0f172a",
+  },
+  editButtonLabel: {
+    color: "#ffffff",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+  deleteButton: {
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#fecdca",
+    backgroundColor: "#fff1f0",
+  },
+  deleteButtonLabel: {
+    color: "#b42318",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+  outlineButton: {
+    borderWidth: 1,
+    borderColor: "#d0d5dd",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  outlineButtonLabel: {
+    color: "#0a7ea4",
   },
   errorText: {
     color: "#b42318",
+    textAlign: "center",
   },
 });

@@ -1,3 +1,5 @@
+// Shared clothing service utilities — Supabase table/bucket accessors,
+// user auth check, storage path builder, and row normalizer.
 import { supabase } from "@/lib/supabase";
 import { ClothingItem } from "@/types/clothing";
 

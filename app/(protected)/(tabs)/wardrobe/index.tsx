@@ -1,3 +1,5 @@
+// Wardrobe index — custom top tab bar (Clothing | Outfits) rendered without any
+// extra package. Clothing tab loads the user's grid; Outfits tab is a placeholder.
 import { Image } from "expo-image";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useRef, useState } from "react";
@@ -10,7 +12,6 @@ import {
   View,
 } from "react-native";
 
-import { FilterSelect } from "@/components/ui/FilterSelect";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Screen } from "@/components/ui/Screen";
@@ -24,20 +25,6 @@ type ClothingGridItem = {
   imageUrl: string;
 };
 
-function getFilterOptions(
-  items: ClothingGridItem[],
-  field: "category" | "color"
-): string[] {
-  return [...new Set(items.map((entry) => entry.item[field]).filter(Boolean))] as string[];
-}
-
-function getTagFilterOptions(
-  items: ClothingGridItem[],
-  field: "style_tags"
-): string[] {
-  return [...new Set(items.flatMap((entry) => entry.item[field] ?? []))];
-}
-
 function TopTabBar({
   activeTab,
   onTabChange,
@@ -48,7 +35,7 @@ function TopTabBar({
   return (
     <View style={topTabStyles.container}>
       <Pressable
-        style={[topTabStyles.tab, activeTab === "clothing" && topTabStyles.tabActive]}
+        style={topTabStyles.tab}
         onPress={() => onTabChange("clothing")}
       >
         <ThemedText
@@ -59,7 +46,7 @@ function TopTabBar({
         {activeTab === "clothing" && <View style={topTabStyles.indicator} />}
       </Pressable>
       <Pressable
-        style={[topTabStyles.tab, activeTab === "outfits" && topTabStyles.tabActive]}
+        style={topTabStyles.tab}
         onPress={() => onTabChange("outfits")}
       >
         <ThemedText
@@ -85,14 +72,10 @@ function OutfitsTab() {
 export default function WardrobeIndexScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<WardrobeTab>("clothing");
-
   const [items, setItems] = useState<ClothingGridItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const hasLoadedOnceRef = useRef(false);
 
   const loadItems = useCallback(async (mode: "initial" | "refresh" = "initial") => {
@@ -112,7 +95,6 @@ export default function WardrobeIndexScreen() {
           imageUrl: await getClothingImageUrl(item.image_path),
         }))
       );
-
       setItems(gridItems);
       setError(null);
       hasLoadedOnceRef.current = true;
@@ -132,32 +114,11 @@ export default function WardrobeIndexScreen() {
     }, [loadItems])
   );
 
-  const categoryOptions = getFilterOptions(items, "category");
-  const colorOptions = getFilterOptions(items, "color");
-  const styleOptions = getTagFilterOptions(items, "style_tags");
-
-  const filteredItems = items.filter((entry) => {
-    const matchesCategory = !selectedCategory || entry.item.category === selectedCategory;
-    const matchesColor = !selectedColor || entry.item.color === selectedColor;
-    const matchesStyle =
-      !selectedStyle || (entry.item.style_tags ?? []).includes(selectedStyle);
-    return matchesCategory && matchesColor && matchesStyle;
-  });
-
-  const hasActiveFilters =
-    selectedCategory !== null || selectedColor !== null || selectedStyle !== null;
-
-  const activeItemCount = filteredItems.length;
-  const totalItemCount = items.length;
-
   const renderItem = ({ item }: { item: ClothingGridItem }) => (
     <Pressable
       style={styles.card}
       onPress={() => {
-        router.push({
-          pathname: "./item/[id]",
-          params: { id: item.item.id },
-        });
+        router.push(`/wardrobe/item/${item.item.id}`);
       }}
     >
       <Image
@@ -172,7 +133,7 @@ export default function WardrobeIndexScreen() {
         <View style={styles.cardTagRow}>
           <View style={styles.cardTag}>
             <ThemedText style={styles.cardTagLabel} numberOfLines={1}>
-              {item.item.color ?? "Unknown color"}
+              {item.item.color ?? "—"}
             </ThemedText>
           </View>
           <View style={styles.cardTag}>
@@ -191,7 +152,7 @@ export default function WardrobeIndexScreen() {
         <TopTabBar activeTab={activeTab} onTabChange={setActiveTab} />
         <View style={styles.centerState}>
           <ActivityIndicator size="small" color="#0a7ea4" />
-          <ThemedText>Loading clothing items...</ThemedText>
+          <ThemedText>Loading...</ThemedText>
         </View>
       </Screen>
     );
@@ -205,9 +166,7 @@ export default function WardrobeIndexScreen() {
           <ThemedText style={styles.errorText}>{error}</ThemedText>
           <Pressable
             style={styles.retryButton}
-            onPress={() => {
-              void loadItems();
-            }}
+            onPress={() => { void loadItems(); }}
           >
             <ThemedText style={styles.retryLabel}>Try again</ThemedText>
           </Pressable>
@@ -223,106 +182,29 @@ export default function WardrobeIndexScreen() {
       {activeTab === "outfits" ? (
         <OutfitsTab />
       ) : (
-        <>
-          <View style={styles.heroCard}>
-            <View style={styles.heroTextBlock}>
-              <ThemedText style={styles.heroEyebrow}>Wardrobe overview</ThemedText>
-              <ThemedText style={styles.heroTitle}>
-                {activeItemCount} {activeItemCount === 1 ? "item" : "items"}
-              </ThemedText>
-              <ThemedText style={styles.heroCopy}>
-                {hasActiveFilters
-                  ? `Filtered from ${totalItemCount} total pieces`
-                  : "Everything you have added so far"}
-              </ThemedText>
-            </View>
-            <Pressable
-              style={styles.addButton}
-              onPress={() => {
-                router.push("/add");
-              }}
-            >
-              <ThemedText style={styles.addButtonLabel}>Add item</ThemedText>
-            </Pressable>
-          </View>
-
-          {error ? (
-            <ThemedView style={styles.inlineErrorBanner}>
-              <ThemedText style={styles.errorText}>{error}</ThemedText>
+        <FlatList
+          data={items}
+          keyExtractor={(entry) => entry.item.id}
+          numColumns={2}
+          columnWrapperStyle={items.length > 1 ? styles.row : undefined}
+          contentContainerStyle={[
+            styles.listContent,
+            items.length === 0 && styles.emptyListContent,
+          ]}
+          renderItem={renderItem}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={() => { void loadItems("refresh"); }}
+            />
+          }
+          ListEmptyComponent={
+            <ThemedView style={styles.emptyState}>
+              <ThemedText type="subtitle">No clothing yet</ThemedText>
+              <ThemedText>Add your first item to start building your wardrobe.</ThemedText>
             </ThemedView>
-          ) : null}
-
-          <View style={styles.filtersSection}>
-            <View style={styles.filtersHeaderRow}>
-              <ThemedText style={styles.filtersTitle}>Filters</ThemedText>
-              {hasActiveFilters ? (
-                <Pressable
-                  onPress={() => {
-                    setSelectedCategory(null);
-                    setSelectedColor(null);
-                    setSelectedStyle(null);
-                  }}
-                >
-                  <ThemedText style={styles.clearFiltersLabel}>Clear all</ThemedText>
-                </Pressable>
-              ) : null}
-            </View>
-            <View style={styles.filterRow}>
-              <FilterSelect
-                label="Category"
-                value={selectedCategory}
-                options={categoryOptions}
-                onChange={setSelectedCategory}
-              />
-              <FilterSelect
-                label="Color"
-                value={selectedColor}
-                options={colorOptions}
-                onChange={setSelectedColor}
-              />
-            </View>
-            <View style={styles.filterRow}>
-              <FilterSelect
-                label="Style"
-                value={selectedStyle}
-                options={styleOptions}
-                onChange={setSelectedStyle}
-              />
-            </View>
-          </View>
-
-          <FlatList
-            data={filteredItems}
-            keyExtractor={(entry) => entry.item.id}
-            numColumns={2}
-            columnWrapperStyle={filteredItems.length > 1 ? styles.row : undefined}
-            contentContainerStyle={[
-              styles.listContent,
-              filteredItems.length === 0 && styles.emptyListContent,
-            ]}
-            renderItem={renderItem}
-            refreshControl={
-              <RefreshControl
-                refreshing={isRefreshing}
-                onRefresh={() => {
-                  void loadItems("refresh");
-                }}
-              />
-            }
-            ListEmptyComponent={
-              <ThemedView style={styles.emptyState}>
-                <ThemedText type="subtitle">
-                  {hasActiveFilters ? "No matches for current filters" : "No clothing yet"}
-                </ThemedText>
-                <ThemedText>
-                  {hasActiveFilters
-                    ? "Try clearing one or more filters to see more items."
-                    : "Add your first clothing item to start building your wardrobe."}
-                </ThemedText>
-              </ThemedView>
-            }
-          />
-        </>
+          }
+        />
       )}
     </Screen>
   );
@@ -333,7 +215,7 @@ const topTabStyles = StyleSheet.create({
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: "#e2e8f0",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   tab: {
     flex: 1,
@@ -341,7 +223,6 @@ const topTabStyles = StyleSheet.create({
     paddingVertical: 12,
     position: "relative",
   },
-  tabActive: {},
   label: {
     fontSize: 15,
     fontWeight: "500",
@@ -371,45 +252,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    paddingVertical: 48,
-  },
-  heroCard: {
-    borderRadius: 22,
-    padding: 18,
-    backgroundColor: "#f8fafc",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    gap: 16,
-  },
-  heroTextBlock: {
-    gap: 4,
-  },
-  heroEyebrow: {
-    fontSize: 13,
-    lineHeight: 18,
-    color: "#667085",
-    textTransform: "uppercase",
-    letterSpacing: 0.6,
-  },
-  heroTitle: {
-    fontSize: 30,
-    lineHeight: 34,
-    fontWeight: "700",
-    color: "#101828",
-  },
-  heroCopy: {
-    color: "#667085",
-  },
-  addButton: {
-    alignSelf: "flex-start",
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    backgroundColor: "#0f172a",
-  },
-  addButtonLabel: {
-    color: "#ffffff",
-    fontWeight: "600",
   },
   centerState: {
     flex: 1,
@@ -446,57 +288,26 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   cardTitle: {
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: 16,
+    lineHeight: 22,
     fontWeight: "700",
     color: "#101828",
   },
   cardTagRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: 6,
   },
   cardTag: {
     borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     backgroundColor: "#f2f4f7",
   },
   cardTagLabel: {
-    fontSize: 13,
+    fontSize: 12,
     lineHeight: 16,
     color: "#344054",
-  },
-  inlineErrorBanner: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#fecdca",
-    backgroundColor: "#fef3f2",
-  },
-  filtersSection: {
-    gap: 14,
-    paddingVertical: 4,
-  },
-  filtersHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  filtersTitle: {
-    fontSize: 18,
-    lineHeight: 22,
-    fontWeight: "700",
-    color: "#101828",
-  },
-  clearFiltersLabel: {
-    color: "#0a7ea4",
-    fontWeight: "600",
-  },
-  filterRow: {
-    flexDirection: "row",
-    gap: 12,
   },
   emptyState: {
     gap: 8,

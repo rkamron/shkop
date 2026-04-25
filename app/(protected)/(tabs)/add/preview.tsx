@@ -1,3 +1,5 @@
+// Preview screen — shows the captured/picked image so the user can confirm or
+// go back before committing to the AI processing step.
 import { Image } from "expo-image";
 import { Redirect, useRouter } from "expo-router";
 import { Button, StyleSheet, View } from "react-native";

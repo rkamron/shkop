@@ -1,3 +1,4 @@
+// Home tab stack — placeholder screens until the home dashboard is built out.
 import { Stack } from "expo-router";
 
 export const unstable_settings = {

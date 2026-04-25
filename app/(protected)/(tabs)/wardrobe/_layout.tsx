@@ -1,3 +1,5 @@
+// Wardrobe tab stack — index shows the clothing/outfits top-tab view; item/[id]
+// and edit/[id] push onto this stack when a clothing item is tapped.
 import { Stack } from "expo-router";
 
 export const unstable_settings = {

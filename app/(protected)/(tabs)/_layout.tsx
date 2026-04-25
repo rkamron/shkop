@@ -1,3 +1,4 @@
+// Bottom tab navigator — five primary sections: Home, Wardrobe, Add, Stylist, Me.
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { StyleSheet, View } from "react-native";
@@ -108,10 +109,6 @@ export default function ProtectedTabsLayout() {
           ),
         }}
       />
-      {/* Hidden legacy tabs — kept for their stack screens, not shown in tab bar */}
-      <Tabs.Screen name="closet" options={{ href: null }} />
-      <Tabs.Screen name="outfits" options={{ href: null }} />
-      <Tabs.Screen name="profile" options={{ href: null }} />
     </Tabs>
   );
 }
