@@ -65,7 +65,14 @@ General consumers with no technical expertise required.
 - Users can save outfits
 
 3.7 Stylist
-- AI-powered styling assistant (structure and logic not yet finalized)
+- Users can describe their situation in free text (e.g. "Brunch with my in-laws, 58°F")
+- Users can select one or more occasions: Work, Casual, Date, Gym, Travel, Evening
+- Users can select one or more vibes: Minimal, Soft, Edgy, Bold, Cozy, Preppy
+- The system generates up to 3 outfit suggestions drawn exclusively from the user's own wardrobe
+- Each suggestion shows a confidence percentage, an outfit name, a reason sentence, and thumbnails of the component items
+- Users can regenerate suggestions without changing their filters
+- Users can react to a suggestion (thumbs up, thumbs down, bookmark)
+- Vibe chips are pre-populated from the user's saved style preferences on first load
 
 3.8 Wear History
 - Users can mark items/outfits as worn
@@ -175,8 +182,19 @@ Screens:
   - Allows user to review and modify attributes before saving
 
 6.5 Stylist Section
-Purpose: AI-powered personal styling assistant.
-Status: Planned — structure and logic not yet finalized.
+Purpose: AI-powered personal styling assistant that generates outfit suggestions from the user's own wardrobe.
+
+Screens:
+- Stylist (index)
+  - Header with italic headline "What are you dressing for?"
+  - Free-text prompt input with keyword-to-occasion parsing
+  - Context strip showing today's date and wardrobe item count
+  - Occasion chip row (Work / Casual / Date / Gym / Travel / Evening) — multi-select
+  - Vibe chip row (Minimal / Soft / Edgy / Bold / Cozy / Preppy) — multi-select, pre-populated from preferences
+  - "For you" section with up to 3 outfit suggestion cards
+  - Regenerate button reshuffles suggestions without changing filters
+  - Each outfit card shows: look number, confidence %, outfit name, reason, item thumbnails, feedback actions, "Wear today" CTA
+  - Empty states for: no wardrobe items, no filters selected, no matching combos
 
 6.6 Me Section
 Purpose: Manage user account, preferences, and settings.

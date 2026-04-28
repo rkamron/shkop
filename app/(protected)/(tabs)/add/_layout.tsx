@@ -1,27 +1,37 @@
-// Add flow stack — wraps all add screens with AddClothingDraftProvider so the
-// in-progress draft (image URI, AI attributes) persists across every step.
-// Flow: index → camera → preview → processing → review
+// Add flow stack — hides the tab bar for every screen in this stack via
+// useFocusEffect on the Stack layout itself (one getParent() reaches Tabs).
+// Flow: camera → preview → processing → review
 import { Stack } from "expo-router";
+import { useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 
 import { AddClothingDraftProvider } from "@/providers/add-clothing-draft-provider";
 
 export const unstable_settings = {
-  initialRouteName: "index",
+  initialRouteName: "camera",
 };
 
 export default function AddStackLayout() {
+  const navigation = useNavigation();
+
+  useFocusEffect(
+    useCallback(() => {
+      const tabNavigator = navigation.getParent();
+      tabNavigator?.setOptions({ tabBarStyle: { display: "none" } });
+      return () => {
+        tabNavigator?.setOptions({ tabBarStyle: undefined });
+      };
+    }, [navigation])
+  );
+
   return (
     <AddClothingDraftProvider>
-      <Stack
-        screenOptions={{
-          headerTitleAlign: "center",
-        }}
-      >
-        <Stack.Screen name="index" options={{ title: "Add" }} />
-        <Stack.Screen name="camera" options={{ title: "Camera" }} />
-        <Stack.Screen name="preview" options={{ title: "Preview" }} />
-        <Stack.Screen name="processing" options={{ title: "Processing" }} />
-        <Stack.Screen name="review" options={{ title: "Review" }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="camera" />
+        <Stack.Screen name="preview" />
+        <Stack.Screen name="processing" />
+        <Stack.Screen name="review" />
       </Stack>
     </AddClothingDraftProvider>
   );

@@ -181,16 +181,41 @@ Bottom tab navigation: Home | Wardrobe | Add | Stylist | Me
 - Wardrobe — Outfits subtab: saved outfits list (planned)
 - Item Detail
 - Outfit Detail (planned)
-- Stylist (planned — blank)
-- Me (planned — blank)
+- Stylist — see Section 5 for data flow and recommendation algorithm
+- Me — profile, style preferences, account settings, notifications
 
 5. Data Flow
 
 Upload Flow:
 User -> Upload Image -> API -> Storage -> Save Metadata -> Confirm Tags -> Save Item
 
-Recommendation Flow:
-User Request -> API -> (stub logic) -> Return outfit list
+Recommendation Flow (Stylist tab, client-side):
+1. Tab focus  ->  Supabase: SELECT * FROM clothing_items WHERE user_id = ?
+                            SELECT preferred_styles FROM preferences WHERE user_id = ?
+2. First load ->  Pre-select up to 2 vibe chips from preferred_styles
+3. User selects occasion/vibe chips (or submits free-text prompt)
+4. Client-side scoring pipeline (no network call):
+     a. Seeded-shuffle the item pool (deterministic per seed value)
+     b. Score each item:
+          +3 per occasion keyword hit (item.occasion_tags vs OCCASION_TAGS map)
+          +2 per vibe keyword hit    (item.style_tags vs VIBE_TAGS map)
+          +1 if item.is_favorite
+     c. Sort descending by score; group into structural buckets:
+          dress | top | bottom | shoes | outer | accessory | other
+     d. Greedy combo selection — try templates in order of preference:
+          [top, bottom, shoes] -> [dress, shoes] -> [top, bottom, outer]
+          -> [top, bottom] -> [dress]
+          Pick the highest-scoring valid template; mark chosen items as used;
+          repeat up to 3 times to produce up to 3 outfit cards.
+     e. Normalise raw score to confidence %:
+          confidence = clamp(62 + (rawScore / maxPossible) * 35, 62, 97)
+     f. Fallback: if no template could be satisfied, show top 4 scored items
+5. SuggestionCard renders -> per-item: Supabase Storage createSignedUrl(image_path)
+6. User taps "Regenerate" -> increment seed -> step 4 reruns with a new shuffle
+7. "Wear today" (not yet wired) -> will INSERT into wear_history, UPDATE last_worn
+
+Feedback Flow (not yet wired to backend):
+User thumbs-up / thumbs-down / bookmark -> local state only (future: INSERT into feedback table)
 
 6. Future Extensions
 - AI tagging model

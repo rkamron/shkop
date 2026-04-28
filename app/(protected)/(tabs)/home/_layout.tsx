@@ -1,4 +1,3 @@
-// Home tab stack — placeholder screens until the home dashboard is built out.
 import { Stack } from "expo-router";
 
 export const unstable_settings = {
@@ -7,17 +6,8 @@ export const unstable_settings = {
 
 export default function HomeStackLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerTitleAlign: "center",
-      }}
-    >
-      <Stack.Screen name="index" options={{ title: "Home" }} />
-      <Stack.Screen
-        name="recommendations"
-        options={{ title: "Home Recommendations" }}
-      />
-      <Stack.Screen name="chat" options={{ title: "Chat" }} />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
     </Stack>
   );
 }
